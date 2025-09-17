@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>griffpatch follower count history</title>
+    <style>
+        body {
+            font-family: Rubik, Arial, sans-serif;
+        }
+
+        #data,
+        #loading {
+            width: 100%;
+            height: calc(100vh - 80px);
+        }
+
+        #data {
+            height: 100%;
+            border: none;
+        }
+
+        #data-container {
+            height: calc(100vh - 110px);
+            border: 3px solid black;
+            overflow: hidden;
+            width: calc(100vw - 20px);
+        }
+
+        #loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #buttons #tabs button {
+            border-radius: 5px 5px 0px 0px;
+            border-bottom: 0;
+            padding: 5px;
+        }
+
+        #buttons #tabs button {
+            background-color: #d7d7d7;
+        }
+
+        #buttons #tabs button.selected {
+            background-color: #ebebeb;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+        <h2 style="text-align: center;"><a href="https://scratch.mit.edu/users/griffpatch">griffpatch's</a> follower count history</h2>
+        <div id="buttons">
+            <!-- <a href="https://scratchinfo.quuq.dev/users/griffpatch" style="margin: 0px 20px;">griffpatch's current follower count</a> -->
+            <span id="tabs">
+            <button onclick="update('website')" id="website">View Current Follower Data</button>
+            <button onclick="update('alltime')" id="alltime" class="selected">View All-time Follower Data</button>
+            </span>
+            <form style="display: inline;float: right;" onsubmit="predict(this.querySelector('input').value, this.querySelector('select').value, this.querySelector('button')); return false">
+                <span>Predict when griffpatch will reach</span>
+                <input type="text" placeholder="765432">
+                <span>followers for the</span>
+                <select>
+                    <option value="website">current</option>
+                    <option value="alltime">all-time</option>
+                </select>
+                <span>data — </span>
+                <button style="padding: 0px 10px;" type="submit">Go!</button>
+            </form>
+        </div>
+
+    <div id="data-container">
+        <div id="loading">Loading data...</div>
+        <iframe id="data" onload="this.style.visibility = 'visible';this.previousElementSibling.style.display = 'none'" ></iframe>
+    </div>
+    <script>
+        function update(type) {
+            document.querySelector("#loading").style.display = "flex"
+            document.querySelector("#data").style.visibility = "hidden"
+            document.getElementById(type).classList.add("selected")
+            document.getElementById(type == "website" ? "alltime" : "website").classList.remove("selected")
+            document.querySelector("#data").src = `https://api.quuq.dev/griffpatch/data/${type}`
+        }
+
+        update("website")
+
+        async function predict(query, type, button) {
+            console.log("predicting follower count of", query, "for", type)
+            button.disabled = true
+            button.innerHTML += "<img style='margin-left: 5px;vertical-align: middle;' src='https://cdn.scratch.mit.edu/scratchr2/static/__f17a70240ea1b997b429416c7f10eabf__/images/ajax-loader.gif'>"
+            let result = await (await fetch(`https://api.quuq.dev/griffpatch/predict/${type}/${query}`)).text()
+            button.innerHTML = "Go!"
+            button.disabled = false
+            alert(new Date(result) != "Invalid Date" ? `griffpatch will reach ${query} followers approximately ${new Date(result).toLocaleString()}`: result)
+        }
+    </script>
+</body>
+
+</html>
